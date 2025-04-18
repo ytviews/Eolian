@@ -6,14 +6,13 @@ import { randomUUID } from 'crypto';
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { environment } from '@eolian/common/env';
-import { Agent } from 'http';
 
 type TokenData = {
   timestamp: number;
   poToken?: string;
   placeholderPoToken: string;
   visitorData?: string;
-}
+};
 
 let tokenData: Promise<TokenData> | undefined;
 
@@ -26,17 +25,8 @@ export async function generatePoToken(fetchFunc?: FetchFunction): Promise<TokenD
       return result;
     }
   }
-  tokenData = generateTokenInternal(fetchFunc)
+  tokenData = generateTokenInternal(fetchFunc);
   return tokenData;
-}
-
-export function createProxyAgent(): Agent | undefined {
-  if (!environment.proxy) {
-    return undefined;
-  }
-  const sessId = `sessid-${randomUUID()}`;
-  const { user, password, name } = environment.proxy;
-  return new HttpsProxyAgent(`http://${user}-${sessId}:${password}@${name}`);
 }
 
 export function createProxyUrl(): string | undefined {
@@ -45,16 +35,14 @@ export function createProxyUrl(): string | undefined {
   }
   const sessId = `sessid-${randomUUID()}`;
   const { user, password, name } = environment.proxy;
-  return `http://${user}-${sessId}:${password}@${name}`;
+  return `http://${user}-cc-us-${sessId}:${password}@${name}`;
 }
 
 export function createFetchFunction(proxy?: string): FetchFunction {
   const agent = proxy ? new HttpsProxyAgent(proxy) : undefined;
   return async (input, init) => {
-    const notRequest = typeof input === "string" || input instanceof URL;
-    const url = notRequest
-        ? input
-        : input.url;
+    const notRequest = typeof input === 'string' || input instanceof URL;
+    const url = notRequest ? input : input.url;
 
     const modifiedInit = {
       ...init,
@@ -81,7 +69,7 @@ async function generateTokenInternal(fetchFunc?: FetchFunction): Promise<TokenDa
 
   Object.assign(globalThis, {
     window: dom.window,
-    document: dom.window.document
+    document: dom.window.document,
   });
 
   const bgConfig = {
@@ -91,16 +79,14 @@ async function generateTokenInternal(fetchFunc?: FetchFunction): Promise<TokenDa
     requestKey,
   };
 
-    // @ts-ignore
+  // @ts-ignore
   const challenge = await BG.Challenge.create(bgConfig);
 
-  if (!challenge)
-    throw new Error('Could not get challenge');
+  if (!challenge) throw new Error('Could not get challenge');
 
   if (challenge.script) {
-    const script = challenge.script.find((sc) => sc !== null);
-    if (script)
-      new Function(script)();
+    const script = challenge.script.find(sc => sc !== null);
+    if (script) new Function(script)();
   } else {
     console.warn('Unable to load Botguard.');
   }
@@ -109,17 +95,17 @@ async function generateTokenInternal(fetchFunc?: FetchFunction): Promise<TokenDa
     program: challenge.challenge,
     globalName: challenge.globalName,
     // @ts-ignore
-    bgConfig
+    bgConfig,
   });
 
-    // @ts-ignore
+  // @ts-ignore
   const placeholderPoToken = BG.PoToken.generatePlaceholder(visitorData);
 
   logger.info(
     `NEW TOKENS GENERATED\nPoToken %s\nPlaceholder %s\nVisitorData: %s`,
     poToken,
     placeholderPoToken,
-    visitorData
+    visitorData,
   );
 
   return {

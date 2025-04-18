@@ -9,7 +9,7 @@ export interface CommandOptionsParsingStrategy {
     text: string,
     permission: UserPermission,
     keywords?: Set<string>,
-    patterns?: Pattern[]
+    patterns?: Pattern[],
   ): CommandOptions;
 }
 
@@ -79,6 +79,9 @@ export type KeywordName = Uppercase<
   | 'soundcloud'
   | 'spotify'
   | 'youtube'
+  | 'poem'
+  | 'ai'
+  | 'random'
   | 'playlist'
   | 'album'
   | 'artist'

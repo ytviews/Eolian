@@ -9,16 +9,19 @@ import {
 } from './soundcloud';
 import { createSpotifyAuthorizationCodeProvider, createSpotifyRequest, spotify } from './spotify';
 import { youtube } from './youtube';
+import { poetry } from './poetry';
+import { AiStreamSource } from './speech';
 
 export * from './bing';
 export * from './soundcloud';
 export * from './spotify';
 export * from './youtube';
+export * from './poetry';
 
 export function createAuthCodeRequest(
   provider: IAuthorizationProvider,
   api: TrackSource,
-  refreshToken?: string
+  refreshToken?: string,
 ): IOAuthHttpClient<AuthorizationCodeProvider> {
   switch (api) {
     case TrackSource.Spotify: {
@@ -42,6 +45,10 @@ export function getTrackStream(track: Track): Promise<StreamSource | undefined> 
       return youtube.getStream(track);
     case TrackSource.Spotify:
       return spotify.getStream(track);
+    case TrackSource.Poetry:
+      return poetry.getStream(track);
+    case TrackSource.AI:
+      return Promise.resolve(new AiStreamSource(track));
     default:
       throw new Error('Attempted to fetch stream for unknown source');
   }
@@ -62,6 +69,15 @@ export const SOURCE_DETAILS: Record<TrackSource, TrackSourceDetails> = {
     name: 'YouTube',
     color: Color.YouTube,
     icon: 'https://www.dropbox.com/s/m6dwdgwwf06d67g/youtube_icon.png?raw=1',
+  },
+  [TrackSource.Poetry]: {
+    name: 'Poetry',
+    color: Color.Spotify,
+    icon: 'https://www.dropbox.com/scl/fi/kcdit2k2rqmk2eaymcrcb/poetry_icon.png?rlkey=96dolxro85c4lhspte3ws6keu&st=4u1g80e2&raw=1',
+  },
+  [TrackSource.AI]: {
+    name: 'AI',
+    color: Color.AI,
   },
   [TrackSource.Unknown]: {
     name: 'Unknown',

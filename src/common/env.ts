@@ -57,7 +57,28 @@ function getProxyEnv(): AppEnv['proxy'] {
     name: proxyName,
     password: proxyPass,
     user: proxyUser,
+  };
+}
+
+function getAzureOpenAi() {
+  const apiKey = getEnvOpt('AZURE_OPENAI_KEY');
+  const endpoint = getEnvOpt('AZURE_OPENAI_ENDPOINT');
+  const deployment = getEnvOpt('AZURE_OPENAI_DEPLOYMENT');
+  const apiVersion = getEnvOpt('AZURE_OPENAI_API_VERSION');
+  if (!apiKey || !endpoint || !deployment || !apiVersion) {
+    return undefined;
   }
+  return { apiKey, endpoint, deployment, apiVersion };
+}
+
+function getOpenAi() {
+  const apiKey = getEnvOpt('OPENAI_API_KEY');
+  const ttsModel = getEnvOpt('OPENAI_TTS_MODEL');
+  const audioModel = getEnvOpt('OPENAI_AUDIO_MODEL');
+  if (!apiKey) {
+    return undefined;
+  }
+  return { apiKey, ttsModel, audioModel };
 }
 
 export const environment: AppEnv = {
@@ -84,7 +105,7 @@ export const environment: AppEnv = {
       identityToken: getEnvOpt('YOUTUBE_IDENTITY_TOKEN'),
       cookie: getEnvOpt('YOUTUBE_COOKIE'),
       poToken: getEnvOpt('YOUTUBE_PO_TOKEN'),
-      visitorData: getEnvOpt('YOUTUBE_VISITOR_DATA')
+      visitorData: getEnvOpt('YOUTUBE_VISITOR_DATA'),
     },
     soundcloud: {
       clientId: getEnv('SOUNDCLOUD_CLIENT_ID'),
@@ -93,6 +114,12 @@ export const environment: AppEnv = {
     spotify: {
       clientId: getEnv('SPOTIFY_CLIENT_ID'),
       clientSecret: getEnv('SPOTIFY_CLIENT_SECRET'),
+    },
+    openai: getOpenAi(),
+    azureOpenAi: getAzureOpenAi(),
+    speech: {
+      key: getEnv('SPEECH_SERVICE_KEY'),
+      region: getEnv('SPEECH_SERVICE_REGION'),
     },
   },
   mongo: {

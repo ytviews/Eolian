@@ -20,7 +20,7 @@ export interface AppEnv {
     user: string;
     password: string;
     name: string;
-  },
+  };
   tokens: {
     discord: {
       clientId?: string;
@@ -46,6 +46,21 @@ export interface AppEnv {
     spotify: {
       clientId: string;
       clientSecret: string;
+    };
+    openai?: {
+      apiKey: string;
+      ttsModel?: string;
+      audioModel?: string;
+    };
+    azureOpenAi?: {
+      apiKey: string;
+      endpoint: string;
+      apiVersion: string;
+      deployment: string;
+    };
+    speech: {
+      key: string;
+      region: string;
     };
   };
   mongo: {

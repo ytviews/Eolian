@@ -13,6 +13,8 @@ export const enum TrackSource {
   Spotify,
   YouTube,
   SoundCloud,
+  Poetry,
+  AI,
 }
 
 export type TrackSourceDetails = {
@@ -31,6 +33,7 @@ export interface Track {
   readonly src: TrackSource;
   readonly duration?: number;
   readonly live?: boolean;
+  readonly ai?: boolean;
 }
 
 export interface StreamSource {

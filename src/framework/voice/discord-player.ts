@@ -13,11 +13,11 @@ import { DEFAULT_VOLUME, IDLE_TIMEOUT_MINS } from '@eolian/common/constants';
 import { environment } from '@eolian/common/env';
 import { logger } from '@eolian/common/logger';
 import { ContextClient, ContextVoiceChannel, ContextMusicQueue } from '@eolian/framework/@types';
-import { EventEmitter } from 'node-cache';
 import { Readable } from 'stream';
 import { Player } from './@types';
 import { DiscordVoiceConnection } from './discord-voice-connection';
 import { SongStream } from './song-stream';
+import EventEmitter from 'node:events';
 
 const PLAYER_TIMEOUT = 1000 * 60 * 3;
 const PLAYER_RETRIES = 2;
@@ -35,7 +35,6 @@ const NEXT_SONG_ATTEMPTS = 5;
  *
  */
 export class DiscordPlayer extends EventEmitter implements Player {
-
   private lastUsed = Date.now();
   private timeoutCheck: NodeJS.Timeout | null = null;
   private songStream: SongStream | null = null;
@@ -50,7 +49,7 @@ export class DiscordPlayer extends EventEmitter implements Player {
   constructor(
     private readonly client: ContextClient,
     readonly queue: ContextMusicQueue,
-    private _volume = DEFAULT_VOLUME
+    private _volume = DEFAULT_VOLUME,
   ) {
     super();
   }
@@ -66,10 +65,10 @@ export class DiscordPlayer extends EventEmitter implements Player {
       });
       this._audioPlayer.on('error', this.streamErrorHandler);
       if (environment.debug) {
-        this.audioPlayer.on('debug', message => {
+        this._audioPlayer.on('debug', message => {
           logger.debug(message);
         });
-        this.audioPlayer.on(AudioPlayerStatus.Buffering, () => {
+        this._audioPlayer.on(AudioPlayerStatus.Buffering, () => {
           logger.debug('Audio player is buffering');
         });
         this._audioPlayer.on(AudioPlayerStatus.Playing, () => {
@@ -79,7 +78,7 @@ export class DiscordPlayer extends EventEmitter implements Player {
           logger.debug('Audio player is paused');
         });
       }
-      this.audioPlayer.on(AudioPlayerStatus.Idle, () => {
+      this._audioPlayer.on(AudioPlayerStatus.Idle, () => {
         logger.debug('Audio player is idle');
         this.stop();
       });
@@ -95,7 +94,7 @@ export class DiscordPlayer extends EventEmitter implements Player {
     if (connection) {
       connection.discordConnection.removeListener(
         VoiceConnectionStatus.Disconnected,
-        this.onDisconnectHandler
+        this.onDisconnectHandler,
       );
       connection.close();
     }
@@ -173,7 +172,7 @@ export class DiscordPlayer extends EventEmitter implements Player {
         }
         connection.discordConnection.on(
           VoiceConnectionStatus.Disconnected,
-          this.onDisconnectHandler
+          this.onDisconnectHandler,
         );
         this.timeoutCheck = setInterval(this.timeoutCheckHandler, PLAYER_TIMEOUT);
 
@@ -245,6 +244,7 @@ export class DiscordPlayer extends EventEmitter implements Player {
       this.audioResource = createAudioResource(input, {
         inputType: StreamType.Raw,
         inlineVolume: false,
+        silencePaddingFrames: 30,
       });
 
       this.audioPlayer.play(this.audioResource);
@@ -336,5 +336,4 @@ export class DiscordPlayer extends EventEmitter implements Player {
     this.stop();
     this.emitError();
   };
-
 }
